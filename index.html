@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body
+    class="min-vh-100 bg-success bg-gradient d-flex align-items-center justify-content-center"
+  >
+    <main class="text-center text-white">
+      <h1 class="display-1 fw-bold text-center">Marks Chat</h1>
+      <small class="d-block mb-4">Chat with random people</small>
+
+      <button
+        data-bs-toggle="modal"
+        data-bs-target="#staticBackdrop"
+        href=""
+        class="btn btn-lg btn-warning text-white"
+      >
+        Get Started
+      </button>
+    </main>
+    <div
+      class="modal fade"
+      id="staticBackdrop"
+      data-bs-backdrop="static"
+      data-bs-keyboard="false"
+      tabindex="-1"
+      aria-labelledby="staticBackdropLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="modalHead">Sign Up</h1>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body" id="modalBody">
+            <div id="signUpForm">
+              <div class="mb-3">
+                <label class="form-label" for="">UserName</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="User Name"
+                  id="signUpUserName"
+                />
+              </div>
+              <div class="mb-3">
+                <label class="form-label" for="">Email</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  placeholder="Email"
+                  id="signUpEmail"
+                />
+              </div>
+              <div class="mb-3">
+                <label class="form-label" for="">Gender</label>
+                <select class="form-control" id="signUpGender">
+                  <option value="--">--</option>
+                  <option value="M">Male</option>
+                  <option value="F">Female</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label" for="">Display Picture</label>
+                <input
+                  type="file"
+                  id="dPicture"
+                  accept="image/*"
+                  class="form-control"
+                />
+
+                <div id="progressContainer" style="display: none">
+                  <div
+                    class="progress"
+                    role="progressbar"
+                    aria-label="Basic example"
+                    aria-valuenow="75"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                  >
+                    <div
+                      class="progress-bar"
+                      id="progressBar"
+                      style="width: 0%"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label" for="">Password</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  placeholder="User Name"
+                  id="signUpPassword"
+                />
+              </div>
+
+              <div class="text-center">
+                <button
+                  onclick="registerUser()"
+                  class="btn form-control btn-success"
+                >
+                  Sign UP
+                </button>
+                <small class=""
+                  >Already have an account?
+                  <button onclick="clickSignIn()" class="btn text-danger">
+                    Sign In
+                  </button></small
+                >
+              </div>
+            </div>
+            <div style="display: none" id="signInForm">
+              <div class="mb-3">
+                <label class="form-label" for="">Email</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  placeholder="Email"
+                  id="signInEmail"
+                />
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label" for="">Password</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  placeholder="User Name"
+                  id="signInPassword"
+                />
+              </div>
+
+              <div class="text-center">
+                <button onclick="signinUser()" class="btn form-control btn-success">Sign In</button>
+                <small class=""
+                  >Don't have an account?
+                  <button onclick="clickSignUp()" class="btn text-danger">
+                    Sign Up
+                  </button></small
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
+      import {
+        getStorage,
+        ref,
+        uploadBytesResumable,
+        getDownloadURL,
+      } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-storage.js";
+      import {
+        getDatabase,
+        onValue,
+        set,
+        ref as dbRef,
+      } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-database.js";
+      import {
+        getAuth,
+        createUserWithEmailAndPassword,
+        signInWithEmailAndPassword,
+      } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
+      // TODO: Add SDKs for Firebase products that you want to use
+      // https://firebase.google.com/docs/web/setup#available-libraries
+
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyCZuvDgtws_Q_FPMwR4MHzIQvarmiwdaD4",
+        authDomain: "marks-chat-c8068.firebaseapp.com",
+        projectId: "marks-chat-c8068",
+        storageBucket: "marks-chat-c8068.appspot.com",
+        messagingSenderId: "639285138532",
+        appId: "1:639285138532:web:c84a60029137f7f5b1bb71",
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const database = getDatabase(app);
+      const storage = getStorage(app);
+
+      const userRef = dbRef(database, "user_data");
+      let nextIndex;
+
+      onValue(userRef, (snapshot) => {
+        const userArray = snapshot.val();
+        if (userArray && userArray.length > 0) {
+          nextIndex = userArray.length;
+        } else {
+          nextIndex = 0;
+        }
+      });
+
+      window.registerUser = () => {
+        const email = document.getElementById("signUpEmail").value;
+        const password = document.getElementById("signUpPassword").value;
+        const file = document.getElementById("dPicture").files[0];
+        const user = {
+          gender: document.getElementById("signUpGender").value,
+          userName: document.getElementById("signUpUserName").value,
+          email,
+        };
+
+        createUserWithEmailAndPassword(auth, email, password)
+          .then((credentials) => {
+            user.id = credentials.user.uid;
+            const ppReference = ref(
+              storage,
+              "user_profile_pictures/" + credentials.user.uid
+            );
+            if (file) {
+              const upload = uploadBytesResumable(ppReference, file); // upload image
+              upload.on(
+                "state_changed",
+                (data) => {
+                  const percentageTransfered =
+                    (data.bytesTransferred / data.totalBytes) * 100;
+                  document.getElementById("dPicture").style.display = "none";
+                  document.getElementById("progressContainer").style.display =
+                    "block";
+                  document.getElementById(
+                    "progressBar"
+                  ).style.width = `${percentageTransfered}%`;
+                },
+                (error) => {},
+                //complete
+                () => {
+                  document
+                    .getElementById("progressBar")
+                    .classList.add("bg-success");
+                    //get uploaded file url
+                  getDownloadURL(upload.snapshot.ref).then((url) => {
+                    user.image = url;
+                    const databaseRef = dbRef(
+                      database,
+                      "user_data/" + nextIndex
+                    ); //create reference to database 
+                    set(databaseRef, user);
+
+                    clickSignIn() // change to sign in modal 
+                  });
+                }
+              );
+            }
+          })
+          .catch((err) => {
+            console.log("there was an error");
+          });
+      };
+
+      window.signinUser = () => {
+        const email = document.getElementById("signInEmail").value;
+        const password = document.getElementById("signInPassword").value;
+
+        signInWithEmailAndPassword(auth, email, password)
+          .then((result) => {
+            location.href = '/chatScreen.html'
+          })
+          .catch((err) => {
+            console.log(err)
+            alert("there was an error ");
+          });
+      };
+    </script>
+
+    <script src="script.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

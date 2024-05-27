@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+
+    <style>
+      #chatContainer {
+        display: grid;
+        height: 75vh;
+        align-items: start;
+        padding: 1.2rem;
+        overflow: scroll;
+      }
+
+      .chat {
+        padding: 0.7rem 1.2rem;
+        padding-bottom: 1rem;
+        border-radius: 1rem;
+        width: 75%;
+        margin-bottom: 1rem;
+      }
+      #others {
+        background-color: green;
+        justify-self: left;
+        align-self: baseline;
+      }
+
+      #mine {
+        background-color: rgb(105, 216, 105);
+        justify-self: right;
+      }
+    </style>
+  </head>
+
+  <body class="container p-4">
+    <main class="row min-vh-100 bg-warning bg-gradient bg-opacity-25">
+      <div class="col-4 bg-warning">Hw</div>
+      <section id="chatScreen" class="col">
+        <div class="bg-warning bg-opacity-75 p-3">Group Chat</div>
+        <div id="chatContainer" class="bg-success bg-opacity-25">
+         
+          
+        </div>
+
+        <div class="p-3 row">
+          <div class="col-9">
+            <input type="text" id="chatMessage" class="form-control" />
+          </div>
+          <div class="col-3 text-center">
+            <button onclick="sendChat()" class="btn px-4 btn-success">
+              Send
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
+      import {
+        getStorage,
+        ref,
+        uploadBytesResumable,
+        getDownloadURL,
+      } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-storage.js";
+      import {
+        getDatabase,
+        onValue,
+        set,
+        ref as dbRef,
+      } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-database.js";
+      import {
+        getAuth,
+        createUserWithEmailAndPassword,
+        signInWithEmailAndPassword,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
+      // TODO: Add SDKs for Firebase products that you want to use
+      // https://firebase.google.com/docs/web/setup#available-libraries
+
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyCZuvDgtws_Q_FPMwR4MHzIQvarmiwdaD4",
+        authDomain: "marks-chat-c8068.firebaseapp.com",
+        projectId: "marks-chat-c8068",
+        storageBucket: "marks-chat-c8068.appspot.com",
+        messagingSenderId: "639285138532",
+        appId: "1:639285138532:web:c84a60029137f7f5b1bb71",
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const database = getDatabase(app);
+      const storage = getStorage(app);
+
+      const chatRef = dbRef(database, "chats_data");
+      let nextIndex;
+
+      onValue(chatRef, (snapshot) => {
+        const chatArray = snapshot.val();
+        if (chatArray && chatArray.length > 0) {
+          nextIndex = chatArray.length;
+        } else {
+          nextIndex = 0;
+        }
+        displayChat(chatArray)
+      });
+
+
+      ///get current user Data 
+      let userId;
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+            console.log(user)
+          userId = user.uid;
+      
+        } else {
+        }
+      });
+
+      window.sendChat = () => {
+        const message = document.getElementById("chatMessage").value;
+
+        const chatObject = {
+          userId,
+          message,
+          type: "text",
+          createdAt: Date.now(),
+        };
+
+        const userChatRef = dbRef(database, "chats_data/" + nextIndex);
+        set(userChatRef, chatObject);
+      };
+
+      function displayChat(array){
+        const display = array.map(chat=>{
+            if(userId == chat.userId){
+                return `<div class="chat" id="mine">${chat.message}</div>`
+            }else{
+                return ` <div class="chat" id="others">${chat.message}</div>`
+            }
+        })
+        document.getElementById("chatContainer").innerHTML = display
+      }
+    </script>
+  </body>
+</html>
